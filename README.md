@@ -5,6 +5,7 @@ black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://gith
 status](https://results.pre-commit.ci/badge/github/preocts/http_overeasy/main.svg)](https://results.pre-commit.ci/latest/github/preocts/http_overeasy/main)
 [![Python
 package](https://github.com/preocts/http_overeasy/actions/workflows/python-tests.yml/badge.svg?branch=main)](https://github.com/preocts/http_overeasy/actions/workflows/python-tests.yml)
+[![codecov](https://codecov.io/gh/Preocts/http_overeasy/branch/main/graph/badge.svg?token=DLlntDhEnI)](https://codecov.io/gh/Preocts/http_overeasy)
 
 # http_overeasy
 
