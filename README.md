@@ -11,11 +11,21 @@ Personal `urllib3` wrapper.
 ## Requirements
 
 - [Python](https://python.org) >= 3.8
+- [urllib3](https://pypi.org/project/urllib3/) >= 1.26.8
 
 ## Internal Links
 
 - [Development Installation Guide](docs/development.md)
-- [Repo documentation](docs/)
+
+---
+
+## Install from GitHub with `pip`
+
+Replace `vX.X.X` with desired release version.
+
+```bash
+python -m pip install git+https://github.com/Preocts/http_overeasy.git@vX.X.X
+```
 
 ---
 
@@ -36,21 +46,21 @@ RETRY_STATUS_FORCELIST = [500, 502, 503, 504]
 RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 ```
 
-### Keyword Arguments
+**Keyword Arguments**
 
 - `headers` : `Optional[Dict[str, str]]` (default: `None`)
   - Define global headers that will be used for all requests unless alternative headers are provided in those requests
 - `max_pool` : `int` (default: `10`)
-  - Maximum number of pools for urllib3 PoolManager to allow
+  - Maximum number of pools for `urllib3.PoolManager` to allow
 
-### Attributes
+**Attributes**
 
 - `http` : `urllib3.PoolManager`
-  - Direct access, if needed, to urllib3 object
+  - Direct access, if needed, to `urllib3` object
 - `headers` : `Optional[Dict[str, str]]
   - Global headers applied to all requests unless otherwise provided in method call
 
-### Methods
+**Methods**
 
   - `get(...)`
   - `delete(...)`
@@ -63,12 +73,12 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
 All `HTTPResponses` are wrapped in a custom model that provides quick access to data.
 
-### Attributes
+**Attributes**
 
 - `http_response` : `urllib3.response.HTTPResponse`
   - The original `HTTPResponse` object as returned by `urllib3`
 
-### Methods
+**Methods**
 
 - `has_success` : `bool`
   - Boolean mark of a response code of 200 to 299
