@@ -190,3 +190,25 @@ def test_patch_with_parameters(
         headers=headers,
         method="PATCH",
     )
+
+
+def test_use_global_headers_with_fields(patch_client: HTTPClient) -> None:
+    patch_client.headers = MOCK_HEADERS
+    patch_client._request_with_field("GET", "", None, None)
+    patch_client.http.request.assert_called_with(
+        url="",
+        fields=None,
+        headers=MOCK_HEADERS,
+        method="GET",
+    )
+
+
+def test_use_global_headers_with_body(patch_client: HTTPClient) -> None:
+    patch_client.headers = MOCK_HEADERS
+    patch_client._request_with_field("POST", "", None, None)
+    patch_client.http.request.assert_called_with(
+        url="",
+        fields=None,
+        headers=MOCK_HEADERS,
+        method="POST",
+    )
