@@ -63,10 +63,66 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 **Methods**
 
   - `get(...)`
+    - GET method with Response model returned
+    - Args:
+      - `url` : `str`
+        - HTTPS URL of target
+      - `fields` : `Dict[str, Any]` (default: `None`)
+        - {key:value} dict of fields to be translated to urlecoded string
+      - `headers` `Dict[str, str]` (default: `None`)
+        - Optional headers to use over global headers
+    - Returns:
+      - `Response`
   - `delete(...)`
+    - DELETE method with Response model returned
+    - Args:
+      - `url` : `str`
+        - HTTPS URL of target
+      - `fields` : `Dict[str, Any]` (default: `None`)
+        - {key:value} dict of fields to be translated to urlecoded string
+      - `headers` `Dict[str, str]` (default: `None`)
+        - Optional headers to use over global headers
+    - Returns:
+      - `Response`
   - `post(...)`
+    - POST method with Response model returned
+    - Args:
+      - `url` : `str`
+        - HTTPS URL of target
+      - `body` : `Dict[str, Any]` (default: `None`)
+        - {key:value} dict of payload to be delivered
+      - `headers` `Dict[str, str]` (default: `None`)
+        - Optional headers to use over global headers
+      - `urlencode` : `bool` (default: `False`)
+        - When true, body is sent as urlencoded string
+    - Returns:
+      - `Response`
   - `put(...)`
+    - PUT method with Response model returned
+    - Args:
+      - `url` : `str`
+        - HTTPS URL of target
+      - `body` : `Dict[str, Any]` (default: `None`)
+        - {key:value} dict of payload to be delivered
+      - `headers` `Dict[str, str]` (default: `None`)
+        - Optional headers to use over global headers
+      - `urlencode` : `bool` (default: `False`)
+        - When true, body is sent as urlencoded string
+    - Returns:
+      - `Response`
   - `patch(...)`
+    - PATCH method with Response model returned
+    - Args:
+      - `url` : `str`
+        - HTTPS URL of target
+      - `body` : `Dict[str, Any]` (default: `None`)
+        - {key:value} dict of payload to be delivered
+      - `headers` `Dict[str, str]` (default: `None`)
+        - Optional headers to use over global headers
+      - `urlencode` : `bool` (default: `False`)
+        - When true, body is sent as urlencoded string
+    - Returns:
+      - `Response`
 
 
 ## `Response` Object
