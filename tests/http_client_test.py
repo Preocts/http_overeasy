@@ -3,8 +3,10 @@ from typing import Any
 from typing import Dict
 from typing import Generator
 from typing import Optional
+from typing import Tuple
 from unittest.mock import MagicMock
 from unittest.mock import patch
+from urllib import parse
 
 import pytest
 from http_overeasy import http_client as http_client
@@ -45,6 +47,24 @@ def patch_client() -> Generator[HTTPClient, None, None]:
         client.http.clear()
 
 
+@pytest.fixture(params=(["post", "patch", "put"]))
+def send_fixtures(
+    patch_client: HTTPClient,
+    request: Any,
+) -> Generator[Tuple[HTTPClient, str], None, None]:
+    """Methods that send data to an API: POST, PATCH, PUT"""
+    yield patch_client, request.param
+
+
+@pytest.fixture(params=(["get", "delete"]))
+def fetch_fixtures(
+    patch_client: HTTPClient,
+    request: Any,
+) -> Generator[Tuple[HTTPClient, str], None, None]:
+    """Methods that fetch data from an API: GET, DELETE"""
+    yield patch_client, request.param
+
+
 def test_custom_connection_pool_count(test_client: HTTPClient) -> None:
     assert test_client.http.pools._maxsize == MAX_POOLS
 
@@ -76,119 +96,61 @@ def test_default_constants(base_client: HTTPClient) -> None:
         ("", None, None),
     ),
 )
-def test_get_with_parameters(
+def test_fetch_methods(
     url: str,
     fields: Optional[Dict[str, Any]],
     headers: Optional[Dict[str, str]],
-    patch_client: HTTPClient,
+    fetch_fixtures: Tuple[HTTPClient, str],
 ) -> None:
-    result = patch_client.get(url, fields, headers)
+    patch_client, send_method = fetch_fixtures
+    result = getattr(patch_client, send_method)(url, fields, headers)
+
     assert isinstance(result, Response)
+
+    patch_client.http.request.assert_called_once()
     patch_client.http.request.assert_called_with(
         url=url,
         fields=fields,
         headers=headers,
-        method="GET",
+        method=send_method.upper(),
     )
 
 
 @pytest.mark.parametrize(
-    argnames=("url", "fields", "headers"),
+    argnames=("url", "body", "headers", "urlencode"),
     argvalues=(
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS),
-        ("https://google.com", None, MOCK_HEADERS),
-        ("https://google.com", {"test": "test01"}, None),
-        ("", None, None),
+        ("https://google.com", {"test": "test01"}, MOCK_HEADERS, False),
+        ("https://google.com", None, MOCK_HEADERS, False),
+        ("https://google.com", {"test": "test01"}, None, False),
+        ("", None, None, False),
+        ("https://google.com", {"test": "test01"}, MOCK_HEADERS, True),
+        ("https://google.com", None, MOCK_HEADERS, True),
+        ("https://google.com", {"test": "test01"}, None, True),
+        ("", None, None, True),
     ),
 )
-def test_delete_with_parameters(
-    url: str,
-    fields: Optional[Dict[str, Any]],
-    headers: Optional[Dict[str, str]],
-    patch_client: HTTPClient,
-) -> None:
-    result = patch_client.delete(url, fields, headers)
-    assert isinstance(result, Response)
-    patch_client.http.request.assert_called_with(
-        url=url,
-        fields=fields,
-        headers=headers,
-        method="DELETE",
-    )
-
-
-@pytest.mark.parametrize(
-    argnames=("url", "body", "headers"),
-    argvalues=(
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS),
-        ("https://google.com", None, MOCK_HEADERS),
-        ("https://google.com", {"test": "test01"}, None),
-        ("", None, None),
-    ),
-)
-def test_post_with_parameters(
+def test_send_methods(
     url: str,
     body: Optional[Dict[str, Any]],
     headers: Optional[Dict[str, str]],
-    patch_client: HTTPClient,
+    urlencode: bool,
+    send_fixtures: Tuple[HTTPClient, str],
 ) -> None:
-    result = patch_client.post(url, body, headers)
+    patch_client, send_method = send_fixtures
+    result = getattr(patch_client, send_method)(url, body, headers, urlencode)
+
     assert isinstance(result, Response)
+    if urlencode:
+        expected_body = parse.urlencode(body or {}, doseq=True)
+    else:
+        expected_body = json.dumps(body)
+
+    patch_client.http.request.assert_called_once()
     patch_client.http.request.assert_called_with(
         url=url,
-        body=json.dumps(body),
+        body=expected_body,
         headers=headers,
-        method="POST",
-    )
-
-
-@pytest.mark.parametrize(
-    argnames=("url", "body", "headers"),
-    argvalues=(
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS),
-        ("https://google.com", None, MOCK_HEADERS),
-        ("https://google.com", {"test": "test01"}, None),
-        ("", None, None),
-    ),
-)
-def test_put_with_parameters(
-    url: str,
-    body: Optional[Dict[str, Any]],
-    headers: Optional[Dict[str, str]],
-    patch_client: HTTPClient,
-) -> None:
-    result = patch_client.put(url, body, headers)
-    assert isinstance(result, Response)
-    patch_client.http.request.assert_called_with(
-        url=url,
-        body=json.dumps(body),
-        headers=headers,
-        method="PUT",
-    )
-
-
-@pytest.mark.parametrize(
-    argnames=("url", "body", "headers"),
-    argvalues=(
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS),
-        ("https://google.com", None, MOCK_HEADERS),
-        ("https://google.com", {"test": "test01"}, None),
-        ("", None, None),
-    ),
-)
-def test_patch_with_parameters(
-    url: str,
-    body: Optional[Dict[str, Any]],
-    headers: Optional[Dict[str, str]],
-    patch_client: HTTPClient,
-) -> None:
-    result = patch_client.patch(url, body, headers)
-    assert isinstance(result, Response)
-    patch_client.http.request.assert_called_with(
-        url=url,
-        body=json.dumps(body),
-        headers=headers,
-        method="PATCH",
+        method=send_method.upper(),
     )
 
 

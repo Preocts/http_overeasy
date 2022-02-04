@@ -3,6 +3,7 @@ import logging
 from typing import Any
 from typing import Dict
 from typing import Optional
+from urllib import parse
 
 import urllib3
 from http_overeasy.response import Response
@@ -85,6 +86,7 @@ class HTTPClient:
         url: str,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
+        urlencode: bool = False,
     ) -> Response:
         """
         POST method with Response model returned
@@ -93,17 +95,19 @@ class HTTPClient:
             url: HTTPS URL of target
             body: {key:value} dict of payload to be delivered
             headers: Optional headers to use over global headers
+            urlencode: When true, body is sent as urlencoded string
 
         Returns:
             Response
         """
-        return self._request_with_body("POST", url, body, headers)
+        return self._request_with_body("POST", url, body, headers, urlencode)
 
     def put(
         self,
         url: str,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
+        urlencode: bool = False,
     ) -> Response:
         """
         PUT method with Response model returned
@@ -112,17 +116,19 @@ class HTTPClient:
             url: HTTPS URL of target
             body: {key:value} dict of payload to be delivered
             headers: Optional headers to use over global headers
+            urlencode: When true, body is sent as urlencoded string
 
         Returns:
             Response
         """
-        return self._request_with_body("PUT", url, body, headers)
+        return self._request_with_body("PUT", url, body, headers, urlencode)
 
     def patch(
         self,
         url: str,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
+        urlencode: bool = False,
     ) -> Response:
         """
         PATCH method with Response model returned
@@ -131,11 +137,12 @@ class HTTPClient:
             url: HTTPS URL of target
             body: {key:value} dict of payload to be delivered
             headers: Optional headers to use over global headers
+            urlencode: When true, body is sent as urlencoded string
 
         Returns:
             Response
         """
-        return self._request_with_body("PATCH", url, body, headers)
+        return self._request_with_body("PATCH", url, body, headers, urlencode)
 
     def _request_with_body(
         self,
@@ -143,15 +150,21 @@ class HTTPClient:
         url: str,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
+        urlencode: bool = False,
     ) -> Response:
         """Internal: Handles POST, PUT, and PATCH"""
         headers = headers if headers is not None else self.headers
+
+        if urlencode:
+            request_body = parse.urlencode(body or {}, doseq=True)
+        else:
+            request_body = json.dumps(body)
 
         resp = Response(
             self.http.request(
                 method=method.upper(),
                 url=url,
-                body=json.dumps(body),
+                body=request_body,
                 headers=headers,
             )
         )
