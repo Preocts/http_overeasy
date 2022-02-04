@@ -5,6 +5,7 @@ from typing import Generator
 from typing import Optional
 from unittest.mock import MagicMock
 from unittest.mock import patch
+from urllib import parse
 
 import pytest
 from http_overeasy import http_client as http_client
@@ -118,12 +119,16 @@ def test_delete_with_parameters(
 
 
 @pytest.mark.parametrize(
-    argnames=("url", "body", "headers"),
+    argnames=("url", "body", "headers", "urlencode"),
     argvalues=(
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS),
-        ("https://google.com", None, MOCK_HEADERS),
-        ("https://google.com", {"test": "test01"}, None),
-        ("", None, None),
+        ("https://google.com", {"test": "test01"}, MOCK_HEADERS, False),
+        ("https://google.com", None, MOCK_HEADERS, False),
+        ("https://google.com", {"test": "test01"}, None, False),
+        ("", None, None, False),
+        ("https://google.com", {"test": "test01"}, MOCK_HEADERS, True),
+        ("https://google.com", None, MOCK_HEADERS, True),
+        ("https://google.com", {"test": "test01"}, None, True),
+        ("", None, None, True),
     ),
 )
 def test_post_with_parameters(
@@ -131,12 +136,18 @@ def test_post_with_parameters(
     body: Optional[Dict[str, Any]],
     headers: Optional[Dict[str, str]],
     patch_client: HTTPClient,
+    urlencode: bool,
 ) -> None:
-    result = patch_client.post(url, body, headers)
+    result = patch_client.post(url, body, headers, urlencode)
     assert isinstance(result, Response)
+    if urlencode:
+        expected_body = parse.urlencode(body or {}, doseq=True)
+    else:
+        expected_body = json.dumps(body)
+
     patch_client.http.request.assert_called_with(
         url=url,
-        body=json.dumps(body),
+        body=expected_body,
         headers=headers,
         method="POST",
     )
