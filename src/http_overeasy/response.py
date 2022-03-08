@@ -15,6 +15,10 @@ class Response:
         """determines if status code returned is 200-299"""
         return self.http_response.status in range(200, 300)
 
+    def get_headers(self) -> Dict[str, Any]:
+        """response headers"""
+        return dict(self.http_response.headers)
+
     def get_body(self) -> Optional[str]:
         """utf-8 decoded response body"""
         return self._body.decode("utf-8") if self._body is not None else None

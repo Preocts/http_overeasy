@@ -47,6 +47,10 @@ def response_obj(request: Any) -> ResponseObj:
     )
 
 
+def test_get_headers(response_obj: ResponseObj) -> None:
+    assert response_obj.resp.get_headers() == RESP_HEADERS
+
+
 def test_has_success(response_obj: ResponseObj) -> None:
     assert response_obj.resp.has_success() is response_obj.has_success
 
