@@ -145,3 +145,27 @@ All `HTTPResponses` are wrapped in a custom model that provides quick access to 
 - `get_json` : `Optional[Dict[str, Any]]`
   - JSON decoded dict of response body
   - Note: will be `None` if response is not valid JSON
+
+
+## `ClientMocker` Object
+
+Used to patch the `HTTPClient` in unit tests. Add responses which are returned when CRUD methods are called. Suggested to use `unittest.mock.patch.object` to patch use of `HTTPClient` in tests.
+
+**Attributes**
+
+- `called` : `int`
+  - Number of times the mocker was called
+
+**Methods**
+
+- `is_empty` : `bool`
+  - True when all added responses have been used
+  - Note: Will be true if no responses have been added
+- `add_response` : `None`
+  - Add response to mock. Replayed in order added (FIFO)
+  - Args:
+    - response_body: Expect response from call
+    - response_headers: Response Header dict
+    - status: Staus code of response
+    - url: URL must match that of the call
+    - partial_url_allow: If true, url is matched against .startswith()
