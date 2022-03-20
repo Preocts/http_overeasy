@@ -11,11 +11,15 @@ class ClientMocker:
     def __init__(self) -> None:
         """Creates a mock HTTP client for use in unit-tests"""
         self._urls: list[str] = []
-        self._headers: list[dict[str, str]]
+        self._headers: list[dict[str, str]] = []
         self._responses: list[bytes] = []
         self._statuses: list[int] = []
         self._partial_url_allowed: list[bool] = []
         self.called = 0
+
+    def is_empty(self) -> bool:
+        """True when all added responses have been used"""
+        return not any([self._urls, self._headers, self._responses, self._statuses])
 
     def add_response(
         self,
