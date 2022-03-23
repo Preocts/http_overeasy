@@ -11,7 +11,7 @@ Personal `urllib3` wrapper.
 ## Requirements
 
 - [Python](https://python.org) >= 3.8
-- [urllib3](https://pypi.org/project/urllib3/) >= 1.26.8
+- [urllib3](https://pypi.org/project/urllib3/) >= 1.26.9
 
 ## Internal Links
 
@@ -48,7 +48,7 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
 **Keyword Arguments**
 
-- `headers` : `Optional[Dict[str, str]]` (default: `None`)
+- `headers` : `dict[str, str] | None` (default: `None`)
   - Define global headers that will be used for all requests unless alternative headers are provided in those requests
 - `max_pool` : `int` (default: `10`)
   - Maximum number of pools for `urllib3.PoolManager` to allow
@@ -57,7 +57,7 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
 - `http` : `urllib3.PoolManager`
   - Direct access, if needed, to `urllib3` object
-- `headers` : `Optional[Dict[str, str]]
+- `headers` : `dict[str, str] | None`
   - Global headers applied to all requests unless otherwise provided in method call
 
 **Methods**
@@ -67,9 +67,9 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     - Args:
       - `url` : `str`
         - HTTPS URL of target
-      - `fields` : `Dict[str, Any]` (default: `None`)
+      - `fields` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of fields to be translated to urlecoded string
-      - `headers` `Dict[str, str]` (default: `None`)
+      - `headers` `dict[str, str] | None` (default: `None`)
         - Optional headers to use over global headers
     - Returns:
       - `Response`
@@ -78,9 +78,9 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     - Args:
       - `url` : `str`
         - HTTPS URL of target
-      - `fields` : `Dict[str, Any]` (default: `None`)
+      - `fields` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of fields to be translated to urlecoded string
-      - `headers` `Dict[str, str]` (default: `None`)
+      - `headers` `dict[str, str] | None` (default: `None`)
         - Optional headers to use over global headers
     - Returns:
       - `Response`
@@ -89,12 +89,10 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     - Args:
       - `url` : `str`
         - HTTPS URL of target
-      - `body` : `Dict[str, Any]` (default: `None`)
+      - `body` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of payload to be delivered
-      - `headers` `Dict[str, str]` (default: `None`)
+      - `headers` `dict[str, str] | None` (default: `None`)
         - Optional headers to use over global headers
-      - `urlencode` : `bool` (default: `False`)
-        - When true, body is sent as urlencoded string
     - Returns:
       - `Response`
   - `put(...)`
@@ -102,12 +100,10 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     - Args:
       - `url` : `str`
         - HTTPS URL of target
-      - `body` : `Dict[str, Any]` (default: `None`)
+      - `body` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of payload to be delivered
-      - `headers` `Dict[str, str]` (default: `None`)
+      - `headers` `dict[str, str] | None` (default: `None`)
         - Optional headers to use over global headers
-      - `urlencode` : `bool` (default: `False`)
-        - When true, body is sent as urlencoded string
     - Returns:
       - `Response`
   - `patch(...)`
@@ -115,12 +111,10 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     - Args:
       - `url` : `str`
         - HTTPS URL of target
-      - `body` : `Dict[str, Any]` (default: `None`)
+      - `body` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of payload to be delivered
-      - `headers` `Dict[str, str]` (default: `None`)
+      - `headers` `dict[str, str] | None` (default: `None`)
         - Optional headers to use over global headers
-      - `urlencode` : `bool` (default: `False`)
-        - When true, body is sent as urlencoded string
     - Returns:
       - `Response`
 
@@ -138,11 +132,11 @@ All `HTTPResponses` are wrapped in a custom model that provides quick access to 
 
 - `has_success` : `bool`
   - Boolean mark of a response code of 200 to 299
-- `get_body` : `Optional[str]`
+- `get_body` : `str | None`
   - UTF-8 decoded response body
 - `get_status` : `int`
   - Status code of response
-- `get_json` : `Optional[Dict[str, Any]]`
+- `get_json` : `dict[str, Any] | None`
   - JSON decoded dict of response body
   - Note: will be `None` if response is not valid JSON
 
