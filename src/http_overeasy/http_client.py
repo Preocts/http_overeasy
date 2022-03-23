@@ -1,8 +1,8 @@
+from __future__ import annotations
+
 import json
 import logging
 from typing import Any
-from typing import Dict
-from typing import Optional
 from urllib import parse
 
 import urllib3
@@ -22,12 +22,12 @@ class HTTPClient:
     def __init__(
         self,
         *,
-        headers: Optional[Dict[str, str]] = None,
+        headers: dict[str, str] | None = None,
         max_pool: int = 10,
     ) -> None:
         self.log = logging.getLogger(__name__)
         self.http = self._connection(max_pool)
-        self.headers = headers
+        self.headers = self._format_headers(headers) if headers else None
 
     def _connection(self, max_pool: int) -> urllib3.PoolManager:
         """Returns HTTP pool manager with retries and backoff"""
@@ -46,8 +46,8 @@ class HTTPClient:
     def get(
         self,
         url: str,
-        fields: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        fields: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Response:
         """
         GET method with Response model returned
@@ -65,8 +65,8 @@ class HTTPClient:
     def delete(
         self,
         url: str,
-        fields: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        fields: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Response:
         """
         DELETE method with Response model returned
@@ -84,9 +84,8 @@ class HTTPClient:
     def post(
         self,
         url: str,
-        body: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        urlencode: bool = False,
+        body: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Response:
         """
         POST method with Response model returned
@@ -100,14 +99,13 @@ class HTTPClient:
         Returns:
             Response
         """
-        return self._request_with_body("POST", url, body, headers, urlencode)
+        return self._request_with_body("POST", url, body, headers)
 
     def put(
         self,
         url: str,
-        body: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        urlencode: bool = False,
+        body: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Response:
         """
         PUT method with Response model returned
@@ -121,14 +119,13 @@ class HTTPClient:
         Returns:
             Response
         """
-        return self._request_with_body("PUT", url, body, headers, urlencode)
+        return self._request_with_body("PUT", url, body, headers)
 
     def patch(
         self,
         url: str,
-        body: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        urlencode: bool = False,
+        body: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Response:
         """
         PATCH method with Response model returned
@@ -142,20 +139,19 @@ class HTTPClient:
         Returns:
             Response
         """
-        return self._request_with_body("PATCH", url, body, headers, urlencode)
+        return self._request_with_body("PATCH", url, body, headers)
 
     def _request_with_body(
         self,
         method: str,
         url: str,
-        body: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
-        urlencode: bool = False,
+        body: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Response:
         """Internal: Handles POST, PUT, and PATCH"""
-        headers = headers if headers is not None else self.headers
+        headers = self._format_headers(headers) if headers is not None else self.headers
 
-        if urlencode:
+        if self._is_urlencoded(headers):
             request_body = parse.urlencode(body or {}, doseq=True)
         else:
             request_body = json.dumps(body)
@@ -174,11 +170,11 @@ class HTTPClient:
         self,
         method: str,
         url: str,
-        fields: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        fields: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Response:
         """Internal: Handles GET and DELETE"""
-        headers = headers if headers is not None else self.headers
+        headers = self._format_headers(headers) if headers is not None else self.headers
 
         resp = Response(
             self.http.request(
@@ -189,3 +185,15 @@ class HTTPClient:
             )
         )
         return resp
+
+    @staticmethod
+    def _is_urlencoded(headers: dict[str, str] | None) -> bool:
+        """Determine how to encode the body"""
+        if headers is not None:
+            return not headers.get("content-type", "") == "application/json"
+        return False
+
+    @staticmethod
+    def _format_headers(headers: dict[str, str]) -> dict[str, str]:
+        """Adjust all keys to lower-case"""
+        return {key.lower(): value for key, value in headers.items()}
