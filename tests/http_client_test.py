@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from typing import Any
 from typing import Dict
@@ -15,7 +17,8 @@ from http_overeasy.response import Response
 from urllib3.response import HTTPResponse
 
 MAX_POOLS = 2
-MOCK_HEADERS = {"Accept": "application/json"}
+MOCK_HEADERS_JSON = {"content-type": "application/json"}
+MOCK_HEADERS_URLE = {"content-type": "application/x-www-form-urlencoded"}
 
 
 @pytest.fixture
@@ -27,7 +30,7 @@ def base_client() -> Generator[HTTPClient, None, None]:
 
 @pytest.fixture
 def test_client() -> Generator[HTTPClient, None, None]:
-    client = HTTPClient(max_pool=MAX_POOLS, headers=MOCK_HEADERS)
+    client = HTTPClient(max_pool=MAX_POOLS, headers=MOCK_HEADERS_JSON)
     yield client
     client.http.clear()
 
@@ -70,7 +73,7 @@ def test_custom_connection_pool_count(test_client: HTTPClient) -> None:
 
 
 def test_global_headers_provided(test_client: HTTPClient) -> None:
-    assert test_client.headers == MOCK_HEADERS
+    assert test_client.headers == MOCK_HEADERS_JSON
 
 
 def test_empty_headers_on_init(base_client: HTTPClient) -> None:
@@ -90,8 +93,8 @@ def test_default_constants(base_client: HTTPClient) -> None:
 @pytest.mark.parametrize(
     argnames=("url", "fields", "headers"),
     argvalues=(
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS),
-        ("https://google.com", None, MOCK_HEADERS),
+        ("https://google.com", {"test": "test01"}, MOCK_HEADERS_JSON),
+        ("https://google.com", None, MOCK_HEADERS_URLE),
         ("https://google.com", {"test": "test01"}, None),
         ("", None, None),
     ),
@@ -116,17 +119,18 @@ def test_fetch_methods(
     )
 
 
+# NOTE: fixture is using content-type application/json by default
 @pytest.mark.parametrize(
     argnames=("url", "body", "headers", "urlencode"),
     argvalues=(
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS, False),
-        ("https://google.com", None, MOCK_HEADERS, False),
+        ("https://google.com", {"test": "test01"}, MOCK_HEADERS_JSON, False),
+        ("https://google.com", None, MOCK_HEADERS_JSON, False),
         ("https://google.com", {"test": "test01"}, None, False),
         ("", None, None, False),
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS, True),
-        ("https://google.com", None, MOCK_HEADERS, True),
-        ("https://google.com", {"test": "test01"}, None, True),
-        ("", None, None, True),
+        ("https://google.com", {"test": "test01"}, MOCK_HEADERS_URLE, True),
+        ("https://google.com", None, MOCK_HEADERS_URLE, True),
+        ("https://google.com", {"test": "test01"}, None, False),
+        ("", None, None, False),
     ),
 )
 def test_send_methods(
@@ -137,7 +141,7 @@ def test_send_methods(
     send_fixtures: Tuple[HTTPClient, str],
 ) -> None:
     patch_client, send_method = send_fixtures
-    result = getattr(patch_client, send_method)(url, body, headers, urlencode)
+    result = getattr(patch_client, send_method)(url, body, headers)
 
     assert isinstance(result, Response)
     if urlencode:
@@ -155,22 +159,54 @@ def test_send_methods(
 
 
 def test_use_global_headers_with_fields(patch_client: HTTPClient) -> None:
-    patch_client.headers = MOCK_HEADERS
+    patch_client.headers = MOCK_HEADERS_JSON
     patch_client._request_with_field("GET", "", None, None)
     patch_client.http.request.assert_called_with(
         url="",
         fields=None,
-        headers=MOCK_HEADERS,
+        headers=MOCK_HEADERS_JSON,
         method="GET",
     )
 
 
 def test_use_global_headers_with_body(patch_client: HTTPClient) -> None:
-    patch_client.headers = MOCK_HEADERS
+    patch_client.headers = MOCK_HEADERS_URLE
     patch_client._request_with_field("POST", "", None, None)
     patch_client.http.request.assert_called_with(
         url="",
         fields=None,
-        headers=MOCK_HEADERS,
+        headers=MOCK_HEADERS_URLE,
         method="POST",
     )
+
+
+@pytest.mark.parametrize(
+    ("headers", "expected"),
+    (
+        ({"content-type": "application/x-www-form-urlencoded"}, True),
+        ({}, True),
+        ({"content-type": "application/json"}, False),
+        (None, False),
+    ),
+)
+def test_is_urlencoded(headers: dict[str, str] | None, expected: bool) -> None:
+    result = HTTPClient._is_urlencoded(headers)
+
+    assert result is expected
+
+
+@pytest.mark.parametrize(
+    ("headers", "expected"),
+    (
+        (
+            {"Content-Type": "application/x-www-form-urlencoded"},
+            {"content-type": "application/x-www-form-urlencoded"},
+        ),
+        ({}, {}),
+        ({"content-type": "applicatoin/json"}, {"content-type": "applicatoin/json"}),
+    ),
+)
+def test_format_headers(headers: dict[str, str], expected: dict[str, str]) -> None:
+    result = HTTPClient._format_headers(headers)
+
+    assert result == expected

@@ -27,7 +27,7 @@ class HTTPClient:
     ) -> None:
         self.log = logging.getLogger(__name__)
         self.http = self._connection(max_pool)
-        self.headers = headers
+        self.headers = self._format_headers(headers) if headers else None
 
     def _connection(self, max_pool: int) -> urllib3.PoolManager:
         """Returns HTTP pool manager with retries and backoff"""
@@ -86,7 +86,6 @@ class HTTPClient:
         url: str,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
-        urlencode: bool = False,
     ) -> Response:
         """
         POST method with Response model returned
@@ -100,14 +99,13 @@ class HTTPClient:
         Returns:
             Response
         """
-        return self._request_with_body("POST", url, body, headers, urlencode)
+        return self._request_with_body("POST", url, body, headers)
 
     def put(
         self,
         url: str,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
-        urlencode: bool = False,
     ) -> Response:
         """
         PUT method with Response model returned
@@ -121,14 +119,13 @@ class HTTPClient:
         Returns:
             Response
         """
-        return self._request_with_body("PUT", url, body, headers, urlencode)
+        return self._request_with_body("PUT", url, body, headers)
 
     def patch(
         self,
         url: str,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
-        urlencode: bool = False,
     ) -> Response:
         """
         PATCH method with Response model returned
@@ -142,7 +139,7 @@ class HTTPClient:
         Returns:
             Response
         """
-        return self._request_with_body("PATCH", url, body, headers, urlencode)
+        return self._request_with_body("PATCH", url, body, headers)
 
     def _request_with_body(
         self,
@@ -150,12 +147,11 @@ class HTTPClient:
         url: str,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
-        urlencode: bool = False,
     ) -> Response:
         """Internal: Handles POST, PUT, and PATCH"""
-        headers = headers if headers is not None else self.headers
+        headers = self._format_headers(headers) if headers is not None else self.headers
 
-        if urlencode:
+        if self._is_urlencoded(headers):
             request_body = parse.urlencode(body or {}, doseq=True)
         else:
             request_body = json.dumps(body)
@@ -178,7 +174,7 @@ class HTTPClient:
         headers: Optional[Dict[str, str]] = None,
     ) -> Response:
         """Internal: Handles GET and DELETE"""
-        headers = headers if headers is not None else self.headers
+        headers = self._format_headers(headers) if headers is not None else self.headers
 
         resp = Response(
             self.http.request(
@@ -189,3 +185,15 @@ class HTTPClient:
             )
         )
         return resp
+
+    @staticmethod
+    def _is_urlencoded(headers: Optional[Dict[str, str]]) -> bool:
+        """Determine how to encode the body"""
+        if headers is not None:
+            return not headers.get("content-type", "") == "application/json"
+        return False
+
+    @staticmethod
+    def _format_headers(headers: Dict[str, str]) -> Dict[str, str]:
+        """Adjust all keys to lower-case"""
+        return {key.lower(): value for key, value in headers.items()}
