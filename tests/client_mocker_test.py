@@ -42,6 +42,16 @@ def test_add_response_dict_all_calls(method: str) -> None:
     assert result.get_headers() == MOCK_HEADER
 
 
+def test_add_response_list() -> None:
+    client = ClientMocker()
+    resp = [MOCK_RESP for _ in range(10)]
+    client.add_response(resp, MOCK_HEADER, MOCK_STATUS, MOCK_URL)
+
+    result = client.get(MOCK_URL)
+
+    assert result.get_json() == resp
+
+
 def test_add_response_str() -> None:
     client = ClientMocker()
     resp = json.dumps(MOCK_RESP)
