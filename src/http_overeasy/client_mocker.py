@@ -23,7 +23,7 @@ class ClientMocker:
 
     def add_response(
         self,
-        response_body: dict[str, Any] | str | bytes,
+        response_body: list[dict[str, Any]] | dict[str, Any] | str | bytes,
         response_headers: dict[str, str],
         status: int,
         url: str,
@@ -44,7 +44,7 @@ class ClientMocker:
         self._headers.append(response_headers)
         self._partial_url_allowed.append(partial_url_allowed)
 
-        if isinstance(response_body, dict):
+        if isinstance(response_body, (dict, list)):
             response_body = json.dumps(response_body).encode()
         elif isinstance(response_body, str):
             response_body = response_body.encode()
