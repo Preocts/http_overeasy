@@ -190,7 +190,7 @@ class HTTPClient:
     def _is_urlencoded(headers: dict[str, str] | None) -> bool:
         """Determine how to encode the body"""
         if headers is not None:
-            return not headers.get("content-type", "") == "application/json"
+            return "json" not in headers.get("content-type", "")
         return False
 
     @staticmethod

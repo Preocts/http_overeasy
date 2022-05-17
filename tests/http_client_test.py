@@ -18,6 +18,7 @@ from urllib3.response import HTTPResponse
 
 MAX_POOLS = 2
 MOCK_HEADERS_JSON = {"content-type": "application/json"}
+MOCK_HEADERS_PATCH_JSON = {"content-type": "application/json-patch+json"}
 MOCK_HEADERS_URLE = {"content-type": "application/x-www-form-urlencoded"}
 
 
@@ -186,6 +187,7 @@ def test_use_global_headers_with_body(patch_client: HTTPClient) -> None:
         ({"content-type": "application/x-www-form-urlencoded"}, True),
         ({}, True),
         ({"content-type": "application/json"}, False),
+        ({"content-type": "application/json-patch+json"}, False),
         (None, False),
     ),
 )
