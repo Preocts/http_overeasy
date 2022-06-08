@@ -37,9 +37,9 @@ def test_add_response_dict_all_calls(method: str) -> None:
 
     result = getattr(client, method)(url=MOCK_URL)
 
-    assert result.get_body() == json.dumps(MOCK_RESP)
-    assert result.get_status() == MOCK_STATUS
-    assert result.get_headers() == MOCK_HEADER
+    assert result.text == json.dumps(MOCK_RESP)
+    assert result.status_code == MOCK_STATUS
+    assert result.headers == MOCK_HEADER
 
 
 def test_add_response_list() -> None:
@@ -49,7 +49,7 @@ def test_add_response_list() -> None:
 
     result = client.get(MOCK_URL)
 
-    assert result.get_json() == resp
+    assert result.json() == resp
 
 
 def test_add_response_str() -> None:
@@ -59,7 +59,7 @@ def test_add_response_str() -> None:
 
     result = client.get(MOCK_URL)
 
-    assert result.get_body() == resp
+    assert result.text == resp
 
 
 def test_add_response_byte() -> None:
@@ -69,7 +69,7 @@ def test_add_response_byte() -> None:
 
     result = client.get(url=MOCK_URL)
 
-    assert result.get_body() == resp.decode()
+    assert result.text == resp.decode()
 
 
 def test_url_mismatch_positional() -> None:
@@ -86,4 +86,4 @@ def test_url_match_partial() -> None:
 
     result = client.get(MOCK_URL[:10])
 
-    assert result.get_headers() == MOCK_HEADER
+    assert result.headers == MOCK_HEADER

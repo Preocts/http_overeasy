@@ -65,6 +65,7 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     - Args:
       - `url` : `str`
         - HTTPS URL of target
+    - Keyword Args:
       - `fields` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of fields to be translated to urlecoded string
       - `headers` `dict[str, str] | None` (default: `None`)
@@ -76,6 +77,7 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     - Args:
       - `url` : `str`
         - HTTPS URL of target
+    - Keyword Args:
       - `fields` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of fields to be translated to urlecoded string
       - `headers` `dict[str, str] | None` (default: `None`)
@@ -84,33 +86,45 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
       - `Response`
   - `post(...)`
     - POST method with Response model returned
+    - NOTE: Only json or fields can be provided, not both.
     - Args:
       - `url` : `str`
         - HTTPS URL of target
-      - `body` : `dict[str, Any] | None` (default: `None`)
+    - Keyword Args:
+      - `json` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of payload to be delivered
+      - `fields` : `dict[str, Any] | None` (default: `None`)
+        - {key:value} dict of fields to be translated to urlecoded string
       - `headers` `dict[str, str] | None` (default: `None`)
         - Optional headers to use over global headers
     - Returns:
       - `Response`
   - `put(...)`
     - PUT method with Response model returned
+    - NOTE: Only json or fields can be provided, not both.
     - Args:
       - `url` : `str`
         - HTTPS URL of target
-      - `body` : `dict[str, Any] | None` (default: `None`)
+    - Keyword Args:
+      - `json` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of payload to be delivered
+      - `fields` : `dict[str, Any] | None` (default: `None`)
+        - {key:value} dict of fields to be translated to urlecoded string
       - `headers` `dict[str, str] | None` (default: `None`)
         - Optional headers to use over global headers
     - Returns:
       - `Response`
   - `patch(...)`
     - PATCH method with Response model returned
+    - NOTE: Only json or fields can be provided, not both.
     - Args:
       - `url` : `str`
         - HTTPS URL of target
-      - `body` : `dict[str, Any] | None` (default: `None`)
+    - Keyword Args:
+      - `json` : `dict[str, Any] | None` (default: `None`)
         - {key:value} dict of payload to be delivered
+      - `fields` : `dict[str, Any] | None` (default: `None`)
+        - {key:value} dict of fields to be translated to urlecoded string
       - `headers` `dict[str, str] | None` (default: `None`)
         - Optional headers to use over global headers
     - Returns:
@@ -126,17 +140,21 @@ All `HTTPResponses` are wrapped in a custom model that provides quick access to 
 - `http_response` : `urllib3.response.HTTPResponse`
   - The original `HTTPResponse` object as returned by `urllib3`
 
+**Properties**
+
+- `status_code` : `int`
+  - Status code of response
+- `text` : `str`
+  - UTF-8 decoded response body
+- `headers: `dict[str, Any]`
+  - Response headers
+
 **Methods**
 
 - `has_success` : `bool`
   - Boolean mark of a response code of 200 to 299
-- `get_body` : `str | None`
-  - UTF-8 decoded response body
-- `get_status` : `int`
-  - Status code of response
-- `get_json` : `dict[str, Any] | None`
+- `json` : `dict[str, Any] | None`
   - JSON decoded dict of response body
-  - Note: will be `None` if response is not valid JSON
 
 
 ## `ClientMocker` Object
@@ -192,8 +210,8 @@ the desired version while creating the `venv`. (e.g. `python3` or `python3.8`)
 Clone this repo and enter root directory of repo:
 
 ```bash
-git clone https://github.com/{{ORG_NAME}}/{{REPO_NAME}}
-cd {{REPO_NAME}}
+git clone https://github.com/Preocts/http_overeasy
+cd http_overeasy
 ```
 
 Create the `venv`:
