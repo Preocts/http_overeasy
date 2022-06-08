@@ -1,6 +1,8 @@
+from __future__ import annotations
+
+from json import JSONDecodeError
 from typing import Any
 from typing import NamedTuple
-from typing import Optional
 
 import pytest
 from http_overeasy.response import Response
@@ -19,14 +21,15 @@ RESP_HEADERS = {
 class ResponseObj(NamedTuple):
     resp: Response
     status: int
-    body: Optional[bytes]
+    body: bytes | None
     has_success: bool
     is_json: bool
 
 
 @pytest.fixture(
     params=[
-        (200, b"{}", True, True),  # Empty
+        (200, b"{}", True, True),  # Empty Dict
+        (200, b"", True, False),  # Empty String
         (200, None, True, False),  # None edge case
         (201, b'{"key": "value"}', True, True),  # JSON
         (202, b"Succes was found.", True, False),  # Not JSON
@@ -48,7 +51,7 @@ def response_obj(request: Any) -> ResponseObj:
 
 
 def test_get_headers(response_obj: ResponseObj) -> None:
-    assert response_obj.resp.get_headers() == RESP_HEADERS
+    assert response_obj.resp.headers == RESP_HEADERS
 
 
 def test_has_success(response_obj: ResponseObj) -> None:
@@ -57,17 +60,18 @@ def test_has_success(response_obj: ResponseObj) -> None:
 
 def test_body_capture(response_obj: ResponseObj) -> None:
     if response_obj.body is None:
-        assert response_obj.resp.get_body() is response_obj.body
+        assert response_obj.resp.text == ""
     else:
-        assert response_obj.resp.get_body() == response_obj.body.decode("utf-8")
+        assert response_obj.resp.text == response_obj.body.decode("utf-8")
 
 
 def test_get_status_code(response_obj: ResponseObj) -> None:
-    assert response_obj.resp.get_status() == response_obj.status
+    assert response_obj.resp.status == response_obj.status
 
 
 def test_get_json(response_obj: ResponseObj) -> None:
     if response_obj.is_json:
-        assert isinstance(response_obj.resp.get_json(), dict)
+        assert isinstance(response_obj.resp.json(), dict)
     else:
-        assert response_obj.resp.get_json() is None
+        with pytest.raises(JSONDecodeError):
+            response_obj.resp.json()
