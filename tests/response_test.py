@@ -66,7 +66,7 @@ def test_body_capture(response_obj: ResponseObj) -> None:
 
 
 def test_get_status_code(response_obj: ResponseObj) -> None:
-    assert response_obj.resp.status == response_obj.status
+    assert response_obj.resp.status_code == response_obj.status
 
 
 def test_get_json(response_obj: ResponseObj) -> None:

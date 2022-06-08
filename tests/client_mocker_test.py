@@ -38,7 +38,7 @@ def test_add_response_dict_all_calls(method: str) -> None:
     result = getattr(client, method)(url=MOCK_URL)
 
     assert result.text == json.dumps(MOCK_RESP)
-    assert result.status == MOCK_STATUS
+    assert result.status_code == MOCK_STATUS
     assert result.headers == MOCK_HEADER
 
 

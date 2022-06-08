@@ -14,7 +14,7 @@ class Response:
         self._body = self.http_response.data
 
     @property
-    def status(self) -> int:
+    def status_code(self) -> int:
         """Status code of response."""
         return self.http_response.status
 
