@@ -107,7 +107,7 @@ def test_fetch_methods(
     fetch_fixtures: Tuple[HTTPClient, str],
 ) -> None:
     patch_client, send_method = fetch_fixtures
-    result = getattr(patch_client, send_method)(url, fields, headers)
+    result = getattr(patch_client, send_method)(url, fields=fields, headers=headers)
 
     assert isinstance(result, Response)
 

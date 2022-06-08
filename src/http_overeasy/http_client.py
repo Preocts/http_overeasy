@@ -46,6 +46,7 @@ class HTTPClient:
     def get(
         self,
         url: str,
+        *,
         fields: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> Response:
@@ -65,6 +66,7 @@ class HTTPClient:
     def delete(
         self,
         url: str,
+        *,
         fields: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> Response:
