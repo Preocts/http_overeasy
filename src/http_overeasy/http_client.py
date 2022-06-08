@@ -60,7 +60,7 @@ class HTTPClient:
         Returns:
             Response
         """
-        return self._request_with_field("GET", url, fields, headers)
+        return self._request_handler("GET", url, None, fields, headers)
 
     def delete(
         self,
@@ -79,112 +79,111 @@ class HTTPClient:
         Returns:
             Response
         """
-        return self._request_with_field("DELETE", url, fields, headers)
+        return self._request_handler("DELETE", url, None, fields, headers)
 
     def post(
         self,
         url: str,
-        body: dict[str, Any] | None = None,
+        *,
+        json: dict[str, Any] | None = None,
+        fields: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> Response:
         """
         POST method with Response model returned
 
+        NOTE: Only json or fields can be provided, not both.
+
         Args:
             url: HTTPS URL of target
-            body: {key:value} dict of payload to be delivered
+            json: {key:value} dict of payload to be delivered
+            fields: {key:value} dict of fields to be translated to urlecoded string
             headers: Optional headers to use over global headers
             urlencode: When true, body is sent as urlencoded string
 
         Returns:
             Response
         """
-        return self._request_with_body("POST", url, body, headers)
+        return self._request_handler("POST", url, json, fields, headers)
 
     def put(
         self,
         url: str,
-        body: dict[str, Any] | None = None,
+        *,
+        json: dict[str, Any] | None = None,
+        fields: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> Response:
         """
         PUT method with Response model returned
 
+        NOTE: Only json or fields can be provided, not both.
+
         Args:
             url: HTTPS URL of target
-            body: {key:value} dict of payload to be delivered
+            json: {key:value} dict of payload to be delivered
+            fields: {key:value} dict of fields to be translated to urlecoded string
             headers: Optional headers to use over global headers
             urlencode: When true, body is sent as urlencoded string
 
         Returns:
             Response
         """
-        return self._request_with_body("PUT", url, body, headers)
+        return self._request_handler("PUT", url, json, fields, headers)
 
     def patch(
         self,
         url: str,
-        body: dict[str, Any] | None = None,
+        *,
+        json: dict[str, Any] | None = None,
+        fields: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> Response:
         """
         PATCH method with Response model returned
 
+        NOTE: Only json or fields can be provided, not both.
+
         Args:
             url: HTTPS URL of target
             body: {key:value} dict of payload to be delivered
+            fields: {key:value} dict of fields to be translated to urlecoded string
             headers: Optional headers to use over global headers
             urlencode: When true, body is sent as urlencoded string
 
         Returns:
             Response
         """
-        return self._request_with_body("PATCH", url, body, headers)
+        return self._request_handler("PATCH", url, json, fields, headers)
 
-    def _request_with_body(
+    def _request_handler(
         self,
         method: str,
         url: str,
         body: dict[str, Any] | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> Response:
-        """Internal: Handles POST, PUT, and PATCH"""
-        headers = self._format_headers(headers) if headers is not None else self.headers
-
-        if self._is_urlencoded(headers):
-            request_body = parse.urlencode(body or {}, doseq=True)
-        else:
-            request_body = json.dumps(body)
-
-        resp = Response(
-            self.http.request(
-                method=method.upper(),
-                url=url,
-                body=request_body,
-                headers=headers,
-            )
-        )
-        return resp
-
-    def _request_with_field(
-        self,
-        method: str,
-        url: str,
         fields: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> Response:
-        """Internal: Handles GET and DELETE"""
+        """Internal: Handles request and returns Response model."""
         headers = self._format_headers(headers) if headers is not None else self.headers
+        request_body = None
 
-        resp = Response(
-            self.http.request(
-                method=method.upper(),
-                url=url,
-                fields=fields,
-                headers=headers,
-            )
+        if body:
+            # Encode body as JSON if headers are set to JSON
+            if self._is_urlencoded(headers):
+                request_body = parse.urlencode(body or {}, doseq=True)
+            else:
+                request_body = json.dumps(body)
+
+        resp = self.http.request(
+            method=method.upper(),
+            url=url,
+            body=request_body,
+            fields=fields if not request_body else None,
+            headers=headers,
         )
-        return resp
+
+        return Response(resp)
 
     @staticmethod
     def _is_urlencoded(headers: dict[str, str] | None) -> bool:

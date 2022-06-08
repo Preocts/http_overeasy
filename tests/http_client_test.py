@@ -114,6 +114,7 @@ def test_fetch_methods(
     patch_client.http.request.assert_called_once()
     patch_client.http.request.assert_called_with(
         url=url,
+        body=None,
         fields=fields,
         headers=headers,
         method=send_method.upper(),
@@ -122,27 +123,33 @@ def test_fetch_methods(
 
 # NOTE: fixture is using content-type application/json by default
 @pytest.mark.parametrize(
-    argnames=("url", "body", "headers", "urlencode"),
+    argnames=("url", "body", "fields", "headers", "urlencode"),
     argvalues=(
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS_JSON, False),
-        ("https://google.com", None, MOCK_HEADERS_JSON, False),
-        ("https://google.com", {"test": "test01"}, None, False),
-        ("", None, None, False),
-        ("https://google.com", {"test": "test01"}, MOCK_HEADERS_URLE, True),
-        ("https://google.com", None, MOCK_HEADERS_URLE, True),
-        ("https://google.com", {"test": "test01"}, None, False),
-        ("", None, None, False),
+        ("https://google.com", {"test": "test01"}, None, MOCK_HEADERS_JSON, False),
+        ("https://google.com", None, None, MOCK_HEADERS_JSON, False),
+        ("https://google.com", {"test": "test01"}, None, None, False),
+        ("", None, {"test": "test01"}, None, False),
+        ("https://google.com", {"test": "test01"}, {"test": "test01"}, None, False),
+        ("", None, None, None, False),
+        ("https://google.com", {"test": "test01"}, None, MOCK_HEADERS_URLE, True),
+        ("https://google.com", None, None, MOCK_HEADERS_URLE, True),
     ),
 )
 def test_send_methods(
     url: str,
     body: Optional[Dict[str, Any]],
+    fields: Optional[Dict[str, Any]],
     headers: Optional[Dict[str, str]],
     urlencode: bool,
     send_fixtures: Tuple[HTTPClient, str],
 ) -> None:
     patch_client, send_method = send_fixtures
-    result = getattr(patch_client, send_method)(url, body, headers)
+    result = getattr(patch_client, send_method)(
+        url,
+        json=body,
+        fields=fields,
+        headers=headers,
+    )
 
     assert isinstance(result, Response)
     if urlencode:
@@ -153,31 +160,22 @@ def test_send_methods(
     patch_client.http.request.assert_called_once()
     patch_client.http.request.assert_called_with(
         url=url,
-        body=expected_body,
+        body=expected_body if body else None,
+        fields=fields if not body else None,
         headers=headers,
         method=send_method.upper(),
     )
 
 
-def test_use_global_headers_with_fields(patch_client: HTTPClient) -> None:
+def test_use_global_headers(patch_client: HTTPClient) -> None:
     patch_client.headers = MOCK_HEADERS_JSON
-    patch_client._request_with_field("GET", "", None, None)
+    patch_client._request_handler("GET", "", None, None, None)
     patch_client.http.request.assert_called_with(
         url="",
         fields=None,
+        body=None,
         headers=MOCK_HEADERS_JSON,
         method="GET",
-    )
-
-
-def test_use_global_headers_with_body(patch_client: HTTPClient) -> None:
-    patch_client.headers = MOCK_HEADERS_URLE
-    patch_client._request_with_field("POST", "", None, None)
-    patch_client.http.request.assert_called_with(
-        url="",
-        fields=None,
-        headers=MOCK_HEADERS_URLE,
-        method="POST",
     )
 
 
