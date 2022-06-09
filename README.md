@@ -8,7 +8,14 @@
 
 Personal `urllib3` wrapper.
 
-**Note:** This is a lightweight library meant for prototyping. For more verbose development options you should consider [`httpx`](https://pypi.org/project/httpx/).
+This is a lightweight library meant for prototyping. For more verbose development options you should consider [`httpx`](https://pypi.org/project/httpx/).
+
+**Why?**
+
+I work in many environments where I'm behind a VPN and certificate proxy. Common libraries such as `requests` and `httpx` often need additional system setup such as cert files and environment variables to allow them to work. They are also just big. ~2.4 MB for `requests` and ~3.5 MB for `httpx` doesn't feel like much. However, this lib weighs in at ~900 KB which on some of the systems I have to use makes the difference.
+
+That's what this library answers for me. It's a clean, simple wrapper around `urllib3` for standard REST actions.  It has a data model for responses which mimics `requests` and `httpx` response attributes for easier converting. It also has a mocking object that allows me to stay fast even while writing tests.
+
 
 ## Requirements
 
@@ -26,6 +33,10 @@ python -m pip install git+https://github.com/Preocts/http_overeasy.git@vX.X.X
 ```
 
 ---
+
+## Examples:
+
+See: [Examples folder](examples/)
 
 ## `HTTPClient` Object
 
