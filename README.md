@@ -8,13 +8,23 @@
 
 Personal `urllib3` wrapper.
 
-This is a lightweight library meant for prototyping. For more verbose development options you should consider [`httpx`](https://pypi.org/project/httpx/).
+This is a lightweight library meant for prototyping. For more verbose
+development options you should consider
+[`httpx`](https://pypi.org/project/httpx/).
 
 **Why?**
 
-I work in many environments where I'm behind a VPN and certificate proxy. Common libraries such as `requests` and `httpx` often need additional system setup such as cert files and environment variables to allow them to work. They are also just big. ~2.4 MB for `requests` and ~3.5 MB for `httpx` doesn't feel like much. However, this lib weighs in at ~900 KB which on some of the systems I have to use makes the difference.
+I work in many environments where I'm behind a VPN and certificate proxy. Common
+libraries such as `requests` and `httpx` often need additional system setup such
+as cert files and environment variables to allow them to work. They are also
+just big. ~2.4 MB for `requests` and ~3.5 MB for `httpx` doesn't feel like much.
+However, this lib weighs in at ~900 KB which on some of the systems I have to
+use makes the difference.
 
-That's what this library answers for me. It's a clean, simple wrapper around `urllib3` for standard REST actions.  It has a data model for responses which mimics `requests` and `httpx` response attributes for easier converting. It also has a mocking object that allows me to stay fast even while writing tests.
+That's what this library answers for me. It's a clean, simple wrapper around
+`urllib3` for standard REST actions.  It has a data model for responses which
+mimics `requests` and `httpx` response attributes for easier converting. It also
+has a mocking object that allows me to stay fast even while writing tests.
 
 
 ## Requirements
@@ -40,9 +50,13 @@ See: [Examples folder](examples/)
 
 ## `HTTPClient` Object
 
-This is the primary wrapper around `urllib3`. It provides quick REST methods for target URLs.  Headers can be defined at class initialization and/or in any given call.
+This is the primary wrapper around `urllib3`. It provides quick REST methods for
+target URLs.  Headers can be defined at class initialization and/or in any given
+call.
 
-Default behavior for payloads is to deliver them as urlencoded strings.  This behavior is overridden by `content-type` within the headers. If `json` is found in the `content-type` then a json serialized payload is delivered.
+Default behavior for payloads is to deliver them as urlencoded strings.  This
+behavior is overridden by `content-type` within the headers. If `json` is found
+in the `content-type` then a json serialized payload is delivered.
 
 **Default Retry Policy**
 
@@ -58,7 +72,8 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 **Keyword Arguments**
 
 - `headers` : `dict[str, str] | None` (default: `None`)
-  - Define global headers that will be used for all requests unless alternative headers are provided in those requests
+  - Define global headers that will be used for all requests unless alternative
+    headers are provided in those requests
 - `max_pool` : `int` (default: `10`)
   - Maximum number of pools for `urllib3.PoolManager` to allow
 
@@ -67,7 +82,8 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 - `http` : `urllib3.PoolManager`
   - Direct access, if needed, to `urllib3` object
 - `headers` : `dict[str, str] | None`
-  - Global headers applied to all requests unless otherwise provided in method call
+  - Global headers applied to all requests unless otherwise provided in method
+    call
 
 **Methods**
 
@@ -144,7 +160,8 @@ RETRY_ALLOWED_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE"]
 
 ## `Response` Object
 
-All `HTTPResponses` are wrapped in a custom model that provides quick access to data.
+All `HTTPResponses` are wrapped in a custom model that provides quick access to
+data.
 
 **Attributes**
 
@@ -170,7 +187,9 @@ All `HTTPResponses` are wrapped in a custom model that provides quick access to 
 
 ## `ClientMocker` Object
 
-Used to patch the `HTTPClient` in unit tests. Add responses which are returned when CRUD methods are called. Suggested to use `unittest.mock.patch.object` to patch use of `HTTPClient` in tests.
+Used to patch the `HTTPClient` in unit tests. Add responses which are returned
+when CRUD methods are called. Suggested to use `unittest.mock.patch.object` to
+patch use of `HTTPClient` in tests.
 
 **Attributes**
 
@@ -227,18 +246,18 @@ cd http_overeasy
 
 Create the `venv`:
 
-```bash
-python -m venv venv
+```console
+$ python -m venv venv
 ```
 
 Activate the `venv`:
 
-```bash
+```console
 # Linux/Mac
-. venv/bin/activate
+$ . venv/bin/activate
 
 # Windows
-venv\Scripts\activate
+$ venv\Scripts\activate
 ```
 
 The command prompt should now have a `(venv)` prefix on it. `python` will now
@@ -246,21 +265,18 @@ call the version of the interpreter used to create the `venv`
 
 Install editable library and development requirements:
 
-```bash
+```console
 # Update pip and tools
-python -m pip install --upgrade pip wheel setuptools
-
-# Install development requirements
-python -m pip install -r requirements-dev.txt
+$ python -m pip install --upgrade pip
 
 # Install editable version of library
-python -m pip install --editable .
+$ python -m pip install --editable .[dev]
 ```
 
 Install pre-commit [(see below for details)](#pre-commit):
 
-```bash
-pre-commit install
+```console
+$ pre-commit install
 ```
 
 ---
@@ -269,20 +285,42 @@ pre-commit install
 
 Run pre-commit on all files:
 
-```bash
-pre-commit run --all-files
+```console
+$ pre-commit run --all-files
 ```
 
 Run tests:
 
-```bash
-tox
+```console
+$ tox [-r] [-e py3x]
+```
+
+Build dist:
+
+```console
+$ python -m pip install --upgrade build
+
+$ python -m build
 ```
 
 To deactivate (exit) the `venv`:
 
-```bash
-deactivate
+```console
+$ deactivate
+```
+---
+
+## Note on flake8:
+
+`flake8` is included in the `requirements-dev.txt` of the project. However it
+disagrees with `black`, the formatter of choice, on max-line-length and two
+general linting errors. `.pre-commit-config.yaml` is already configured to
+ignore these. `flake8` doesn't support `pyproject.toml` so be sure to add the
+following to the editor of choice as needed.
+
+```ini
+--ignore=W503,E203
+--max-line-length=88
 ```
 
 ---
@@ -304,13 +342,14 @@ This repo has a Makefile with some quality of life scripts if the system
 supports `make`.  Please note there are no checks for an active `venv` in the
 Makefile.
 
-| PHONY             | Description                                                        |
-| ----------------- | ------------------------------------------------------------------ |
-| `init`            | Update pip, setuptools, and wheel to newest version                |
-| `install`         | install project                                                    |
-| `install-dev`     | install development requirements and project                       |
-| `build-dist`      | Build source distribution and wheel distribution                   |
-| `clean-artifacts` | Deletes python/mypy artifacts including eggs, cache, and pyc files |
-| `clean-tests`     | Deletes tox, coverage, and pytest artifacts                        |
-| `clean-build`     | Deletes build artifacts                                            |
-| `clean-all`       | Runs all clean scripts                                             |
+| PHONY             | Description                                                           |
+| ----------------- | --------------------------------------------------------------------- |
+| `init`            | Update pip to newest version                                          |
+| `install`         | install the project                                                   |
+| `install-test`    | install test requirements and project as editable install             |
+| `install-dev`     | install development/test requirements and project as editable install |
+| `build-dist`      | Build source distribution and wheel distribution                      |
+| `clean-artifacts` | Deletes python/mypy artifacts, cache, and pyc files                   |
+| `clean-tests`     | Deletes tox, coverage, and pytest artifacts                           |
+| `clean-build`     | Deletes build artifacts                                               |
+| `clean-all`       | Runs all clean scripts                                                |
