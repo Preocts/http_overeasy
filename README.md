@@ -29,7 +29,7 @@ has a mocking object that allows me to stay fast even while writing tests.
 
 ## Requirements
 
-- [Python](https://python.org) >= 3.8
+- [Python](https://python.org) >= 3.7
 - [urllib3](https://pypi.org/project/urllib3/) >= 1.26.9
 
 ---
