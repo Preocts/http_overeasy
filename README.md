@@ -2,7 +2,6 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Preocts/http_overeasy/main.svg)](https://results.pre-commit.ci/latest/github/Preocts/http_overeasy/main)
 [![Python package](https://github.com/preocts/http_overeasy/actions/workflows/python-tests.yml/badge.svg?branch=main)](https://github.com/preocts/http_overeasy/actions/workflows/python-tests.yml)
-[![codecov](https://codecov.io/gh/Preocts/http_overeasy/branch/main/graph/badge.svg?token=DLlntDhEnI)](https://codecov.io/gh/Preocts/http_overeasy)
 
 # http_overeasy
 
